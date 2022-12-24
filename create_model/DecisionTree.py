@@ -22,8 +22,8 @@ def data(path):
     line_x_df = pd.read_csv(path, encoding='gbk')
     line_x_df = line_x_df.dropna()
     target = line_x_df['population']
-    #data = line_x_df.drop(['date', 'population'], axis=1)#日客流
-    data = line_x_df.drop(['date', 'population', 'deal_time'], axis=1)#各时段客流量
+    data = line_x_df.drop(['date', 'population'], axis=1)#日客流
+    # data = line_x_df.drop(['date', 'population', 'deal_time'], axis=1)#各时段客流量
     feature_name = data.columns.values
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=7)
     return X_train, X_test, y_train, y_test, feature_name
@@ -39,21 +39,6 @@ def cross_score(X_train, y_train):
     scores_10_mae = cross_val_score(clf_DT, X_train, y_train,scoring="neg_mean_absolute_error", cv = 10)
     scores_10_r2 = cross_val_score(clf_DT, X_train, y_train,scoring="r2", cv = 10)
     print('{:-<50}\nMSE:'.format('10折'), scores_10_mse.mean(), '\nMae:', scores_10_mae.mean(), '\nR2:',scores_10_r2.mean())
-'''
-parameters = {'splitter': ('best', 'random'),
-              'max_depth': range(2, 20, 1),
-              'criterion': ['friedman_mse', 'mse', 'mae'],
-              'min_samples_split': range(5, 20, 3),
-              'min_samples_leaf': range(5, 20, 3)}
-grid_search = GridSearchCV(clf_DT, parameters, n_jobs = -1, cv=10)
-grid_search.fit(X_train, y_train)
-best_param = grid_search.best_params_
-print('{:-^50}'.format('GridSearch网格搜索多参数调优'), '\n最优参数：', grid_search.best_params_, '\n最优得分',
-      grid_search.best_score_)
-
-best_clf_DT = DecisionTreeRegressor(criterion = best_param['criterion'], splitter = best_param['splitter'], max_depth = best_param['max_depth'],
-                                    min_samples_split = best_param['min_samples_split'], min_samples_leaf = best_param['min_samples_leaf'])
-'''
 
 def fit_DT_tree(X_train, y_train, X_test, y_test, col, func, line, pic_path, model_path):
     best_score, best_model, best_depth, best_feature_importance = 0, '', 0, []
@@ -134,149 +119,52 @@ def plot_tree(col, model, func, line, pic_path):
     with open(pic_path + '\{}_{}路公交决策树.png'.format(func, line), "wb") as file:
         file.write(graph.create_png())
 
+'''
+parameters = {'splitter': ('best', 'random'),
+              'max_depth': range(2, 20, 1),
+              'criterion': ['friedman_mse', 'mse', 'mae'],
+              'min_samples_split': range(5, 20, 3),
+              'min_samples_leaf': range(5, 20, 3)}
+grid_search = GridSearchCV(clf_DT, parameters, n_jobs = -1, cv=10)
+grid_search.fit(X_train, y_train)
+best_param = grid_search.best_params_
+print('{:-^50}'.format('GridSearch网格搜索多参数调优'), '\n最优参数：', grid_search.best_params_, '\n最优得分',
+      grid_search.best_score_)
+
+best_clf_DT = DecisionTreeRegressor(criterion = best_param['criterion'], splitter = best_param['splitter'], max_depth = best_param['max_depth'],
+                                    min_samples_split = best_param['min_samples_split'], min_samples_leaf = best_param['min_samples_leaf'])
+'''
+
 if __name__ == '__main__':
     criterions = ['friedman_mse', 'mse', 'mae']
     pic_path = 'E:\公交客流预测\model_train_pic\决策树_日客流量'
     model_path = 'E:\公交客流预测\model\决策树_日客流量'
-    day_pic_path = 'E:\公交客流预测\model_train_pic\决策树_各时段客流量'
-    day_model_path = 'E:\公交客流预测\model\决策树_各时段客流量'
+    # day_pic_path = 'E:\公交客流预测\model_train_pic\决策树_各时段客流量'
+    # day_model_path = 'E:\公交客流预测\model\决策树_各时段客流量'
 
     # 线路6
-    '''    line_6_path = 'E:\公交客流预测\data\\6路公交日客流量.csv'
-    line_6_data = data(line_6_path)
+    # line_6_path = 'E:\公交客流预测\data\\6路公交日客流量.csv'
+    # line_6_data = data(line_6_path)
     line_11_path = 'E:\公交客流预测\data\\11路公交日客流量.csv'
     line_11_data = data(line_11_path)
-    '''
-    day_line_6_path = 'E:\公交客流预测\data\\6路公交各时段客流量.csv'
-    day_line_6_data = data(day_line_6_path)
-    day_line_11_path = 'E:\公交客流预测\data\\11路公交各时段客流量.csv'
-    day_line_11_data = data(day_line_11_path)
+
+    # day_line_6_path = 'E:\公交客流预测\data\\6路公交各时段客流量.csv'
+    # day_line_6_data = data(day_line_6_path)
+    # day_line_11_path = 'E:\公交客流预测\data\\11路公交各时段客流量.csv'
+    # day_line_11_data = data(day_line_11_path)
 
     # 交叉验证
-    #print('日客流量')
-    #cross_score(line_6_data[0], line_6_data[2])
-    #cross_score(line_11_data[0], line_11_data[2])
-    print('各时段客流量')
-    cross_score(day_line_6_data[0], day_line_6_data[2])
-    cross_score(day_line_11_data[0], day_line_11_data[2])
+    print('日客流量')
+    # cross_score(line_6_data[0], line_6_data[2])
+    cross_score(line_11_data[0], line_11_data[2])
+    # print('各时段客流量')
+    # cross_score(day_line_6_data[0], day_line_6_data[2])
+    # cross_score(day_line_11_data[0], day_line_11_data[2])
     # 决策树
     for func in criterions:
-        #fit_DT_tree(line_6_data[0], line_6_data[2], line_6_data[1], line_6_data[3], line_6_data[4], func, '6', pic_path, model_path)
-        #fit_DT_tree(line_11_data[0], line_11_data[2], line_11_data[1], line_11_data[3], line_11_data[4], func, '11',pic_path, model_path)
-        #fit_DT_tree(day_line_6_data[0], day_line_6_data[2], day_line_6_data[1], day_line_6_data[3], day_line_6_data[4], func, '6', day_pic_path, day_model_path)
-        fit_DT_tree(day_line_11_data[0], day_line_11_data[2], day_line_11_data[1], day_line_11_data[3], day_line_11_data[4], func, '11',day_pic_path, day_model_path)
-
-
-"""#划分测试集和训练集
-#网络搜索
-# min_samples_split:分裂内部节点需要的最少样例数.int(具体数目),float(数目的百分比)
-# n_estimators:森林中数的个数。这个属性是典型的模型表现与模型效率成反比的影响因子,即便如此,你还是应该尽可能提高这个数字,以让你的模型更准确更稳定。
-X_train, X_test, y_train, y_test = train_test_split(feature, target, test_size=7)
-
-def GridSearch():
-    parameters = {'splitter':('best', 'random'),'max_depth': range(2,10,1), 'criterion':['friedman_mse', 'mse','mae'],'min_samples_split':range(5,50,5),'min_samples_leaf':range(5,20,1)}
-    model = DecisionTreeRegressor()
-    grid_search = GridSearchCV(model, parameters, cv=5)
-    grid_search.fit(X_train, y_train)
-    print('{:-^50}'.format('GridSearch网格搜索多参数调优'),'\n最优参数：',grid_search.best_params_,'\n最优得分',grid_search.best_score_)
-    return grid_search.best_params_
-
-def createTree(splitter, depth,criter_name,samples_split,samples_leaf,ccp=0):
-    # 决策树
-    clf = DecisionTreeRegressor(splitter = splitter,max_depth =depth,criterion = criter_name,min_samples_split= samples_split,min_samples_leaf= samples_leaf,ccp_alpha=ccp)
-    clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    score = clf.score(X_test, y_test)    #模型正确度
-    #score = dtr.score(data_test, target_test)
-    print('{:-^50}'.format('决策树'),'---------\n模型准确度',score)
-    return y_pred, clf
-
-def count_precision(Y_test,Y_predict):
-    Y_test = list(Y_test)
-    Y_predict = list(Y_predict)
-    deviations = 0
-    precision = 0
-    for i in range(len(Y_test)):
-        cur_dev = abs(Y_test[i]-Y_predict[i])/Y_test[i]
-        deviations = deviations + cur_dev
-        if(cur_dev==0): #可以不要
-            cur_pre = 10
-        elif(cur_dev>0.3): #此项必须
-            cur_pre = 0
-        else:
-            #cur_pre = 10*(1-cur_dev**3/(0.3**3))
-            cur_pre = 10*(1-cur_dev**0.3/(0.3**0.3))
-        precision = precision + cur_pre
-    precision = precision / (10*len(Y_test))
-    print('总偏差：',deviations, '\n平均精度：',precision)
-
-Search_model = GridSearch()
-# (Search_model['splitter'], Search_model['max_depth'], Search_model['criterion'], Search_model['min_samples_split'], Search_model['min_samples_leaf'])
-b = createTree(Search_model['splitter'], Search_model['max_depth'], Search_model['criterion'], Search_model['min_samples_split'], Search_model['min_samples_leaf'])
-
-count_precision(y_test,b[0])
-print('MSE: %6.2f' % metrics.mean_squared_error(y_test, b[0]))
-
-print('RMSE: %6.2f' % np.sqrt(metrics.mean_squared_error(y_test, b[0])))
-
-print('MAE: %6.2f' % metrics.mean_absolute_error(y_test, b[0]))
-X = np.arange(1,len(X_test)+1)
-plt.plot(X,y_test,label='true',c='b',)
-
-plt.plot(X,b[0],label='predict',c='r')
-plt.legend()
-plt.show()
-
-
-# 特征重要性
-a = pd.Series(b[1].feature_importances_, index=line_6_df.columns[2:]).sort_values(ascending=False)
-print(a)
-
-"""
-
-
-
-'''
-X_train, X_test, y_train, y_test = train_test_split(feature, target, test_size=0.2)
-print(X_train.shape,y_train.shape, X_test.shape, y_test.shape)
-clf_DT = DecisionTreeRegressor()
-X_train, X_test, y_train, y_test = train_test_split(feature, target, test_size=0.2, random_state=123)
-
-
-
-clf_DT.fit(X_train, y_train)
-y_pred = clf_DT.predict(X_test)
-
-
-def count_precision(Y_test,Y_predict):
-    Y_test = list(Y_test)
-    Y_predict = list(Y_predict)
-    deviations = 0
-    precision = 0
-    for i in range(len(Y_test)):
-        cur_dev = abs(Y_test[i]-Y_predict[i])/Y_test[i]
-        deviations = deviations + cur_dev
-        if(cur_dev==0): #可以不要
-            cur_pre = 10
-        elif(cur_dev>0.3): #此项必须
-            cur_pre = 0
-        else:
-            #cur_pre = 10*(1-cur_dev**3/(0.3**3))
-            cur_pre = 10*(1-cur_dev**0.3/(0.3**0.3))
-        precision = precision + cur_pre
-    precision = precision / (10*len(Y_test))
-    print(deviations,precision)
-
-for i in np.arange(1,1000):
-    y_pred = y_pred + clf_DT.predict(X_test)
-y_pred = y_pred/1000
-
-count_precision(y_test,y_pred)
-X = np.arange(1,len(X_test)+1)
-plt.plot(X,y_test,label='true',c='b')
-
-plt.plot(X,y_pred,label='predict',c='r')
-plt.show()
-'''
+        # fit_DT_tree(line_6_data[0], line_6_data[2], line_6_data[1], line_6_data[3], line_6_data[4], func, '6', pic_path, model_path)
+        fit_DT_tree(line_11_data[0], line_11_data[2], line_11_data[1], line_11_data[3], line_11_data[4], func, '11',pic_path, model_path)
+        # fit_DT_tree(day_line_6_data[0], day_line_6_data[2], day_line_6_data[1], day_line_6_data[3], day_line_6_data[4], func, '6', day_pic_path, day_model_path)
+        # fit_DT_tree(day_line_11_data[0], day_line_11_data[2], day_line_11_data[1], day_line_11_data[3], day_line_11_data[4], func, '11',day_pic_path, day_model_path)
 
 
