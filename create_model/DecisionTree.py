@@ -10,35 +10,43 @@ import pandas as pd
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.tree import DecisionTreeRegressor,export_graphviz
+from sklearn.tree import DecisionTreeRegressor, export_graphviz
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV, cross_val_score
 import pydotplus
 import joblib
 import warnings
+
 warnings.filterwarnings("ignore")
+
 
 def data(path):
     line_x_df = pd.read_csv(path, encoding='gbk')
     line_x_df = line_x_df.dropna()
     target = line_x_df['population']
-    data = line_x_df.drop(['date', 'population'], axis=1)#日客流
-    # data = line_x_df.drop(['date', 'population', 'deal_time'], axis=1)#各时段客流量
+    # data = line_x_df.drop(['date', 'population'], axis=1)  # 日客流
+    # X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=7)
+    data = line_x_df.drop(['date', 'population', 'deal_time'], axis=1)#各时段客流量
+    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=7 *16)
     feature_name = data.columns.values
-    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=7)
+    # X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=7)
     return X_train, X_test, y_train, y_test, feature_name
+
 
 def cross_score(X_train, y_train):
     clf_DT = DecisionTreeRegressor()
-    scores_3 = cross_val_score(clf_DT, X_train, y_train, cv = 3)
-    scores_5_mse = cross_val_score(clf_DT, X_train, y_train,scoring="neg_mean_squared_error", cv = 5)
-    scores_5_mae = cross_val_score(clf_DT, X_train, y_train,scoring="neg_mean_absolute_error", cv = 5)
-    scores_5_r2 = cross_val_score(clf_DT, X_train, y_train,scoring="r2", cv = 5)
-    print('{:-<50}\nMSE:'.format('5折'), scores_5_mse.mean(),'\nMae:', scores_5_mae.mean(),'\nR2:',scores_5_r2.mean())
-    scores_10_mse = cross_val_score(clf_DT, X_train, y_train,scoring="neg_mean_squared_error", cv = 10)
-    scores_10_mae = cross_val_score(clf_DT, X_train, y_train,scoring="neg_mean_absolute_error", cv = 10)
-    scores_10_r2 = cross_val_score(clf_DT, X_train, y_train,scoring="r2", cv = 10)
-    print('{:-<50}\nMSE:'.format('10折'), scores_10_mse.mean(), '\nMae:', scores_10_mae.mean(), '\nR2:',scores_10_r2.mean())
+    scores_3 = cross_val_score(clf_DT, X_train, y_train, cv=3)
+    scores_5_mse = cross_val_score(clf_DT, X_train, y_train, scoring="neg_mean_squared_error", cv=5)
+    scores_5_mae = cross_val_score(clf_DT, X_train, y_train, scoring="neg_mean_absolute_error", cv=5)
+    scores_5_r2 = cross_val_score(clf_DT, X_train, y_train, scoring="r2", cv=5)
+    print('{:-<50}\nMSE:'.format('5折'), scores_5_mse.mean(), '\nMae:', scores_5_mae.mean(), '\nR2:',
+          scores_5_r2.mean())
+    scores_10_mse = cross_val_score(clf_DT, X_train, y_train, scoring="neg_mean_squared_error", cv=10)
+    scores_10_mae = cross_val_score(clf_DT, X_train, y_train, scoring="neg_mean_absolute_error", cv=10)
+    scores_10_r2 = cross_val_score(clf_DT, X_train, y_train, scoring="r2", cv=10)
+    print('{:-<50}\nMSE:'.format('10折'), scores_10_mse.mean(), '\nMae:', scores_10_mae.mean(), '\nR2:',
+          scores_10_r2.mean())
+
 
 def fit_DT_tree(X_train, y_train, X_test, y_test, col, func, line, pic_path, model_path):
     best_score, best_model, best_depth, best_feature_importance = 0, '', 0, []
@@ -46,7 +54,8 @@ def fit_DT_tree(X_train, y_train, X_test, y_test, col, func, line, pic_path, mod
     test_score, train_score = [], []
     depth = np.arange(2, 15)
     for d in depth:
-        clf = DecisionTreeRegressor(criterion = func, splitter='random', max_depth=d, min_samples_split= 14, min_samples_leaf=8)
+        clf = DecisionTreeRegressor(criterion=func, splitter='random', max_depth=d, min_samples_split=14,
+                                    min_samples_leaf=8)
         clf.fit(X_train, y_train)
         y_pred = clf.predict(X_test)
         score_test = clf.score(X_test, y_test)
@@ -56,12 +65,12 @@ def fit_DT_tree(X_train, y_train, X_test, y_test, col, func, line, pic_path, mod
         if best_score < score_test:
             best_score, best_model, best_depth, best_feature_importance = score_test, clf, d, clf.feature_importances_
         plt.plot(y_pred, lw=1, label='depth=%d, r2=%.5f' % (d, score_test))
-    plt.scatter(np.arange(7),y_test, edgecolor="black", c="darkorange", label="y_test")
+    plt.scatter(np.arange(len(y_test)), y_test, edgecolor="black", c="darkorange", label="y_test")
 
-    plt.legend(loc = 'upper right')
-    plt.xlabel("Sample observation number", fontdict = {"fontsize": 12})
-    plt.ylabel("score", fontdict = {"fontsize": 12})
-    #plt.title("Decision Tree Regression of different depth",fontdict = {"fontsize": 14})
+    plt.legend(loc='upper right')
+    plt.xlabel("Sample observation number", fontdict={"fontsize": 12})
+    plt.ylabel("score", fontdict={"fontsize": 12})
+    # plt.title("Decision Tree Regression of different depth",fontdict = {"fontsize": 14})
     plt.grid()
     plt.savefig(pic_path + '\{}_{}路公交决策树模型评估图.png'.format(func, line), dpi=400,
                 bbox_inches='tight')
@@ -73,6 +82,7 @@ def fit_DT_tree(X_train, y_train, X_test, y_test, col, func, line, pic_path, mod
     # 模型保存
     joblib.dump(best_model, model_path + '\line_{}_{}_DT.model'.format(line, func))
 
+
 def plot_learn_curve(depth, train_score, test_score, func, line, pic_path):
     plt.figure(figsize=(12, 5))
     plt.plot(depth, train_score, 'ro-', label='Train r2')
@@ -80,37 +90,39 @@ def plot_learn_curve(depth, train_score, test_score, func, line, pic_path):
     plt.legend(fontsize=12)
     plt.xlabel("depth", fontdict={"fontsize": 12})
     plt.xlabel("score", fontdict={"fontsize": 12})
-    #plt.title("Learning Curve of Decision Tree Regression", fontdict={"fontsize": 14})
-    plt.savefig(pic_path + '\{}_{}路公交决策树学习曲线图.png'.format(func,line), dpi=400, bbox_inches='tight')
+    # plt.title("Learning Curve of Decision Tree Regression", fontdict={"fontsize": 14})
+    plt.savefig(pic_path + '\{}_{}路公交决策树学习曲线图.png'.format(func, line), dpi=400, bbox_inches='tight')
     plt.grid()
     plt.show()
 
+
 def plot_feature(col, feature_imporance, func, line, pic_path):
-    plt.figure(figsize = (12, 5))
+    plt.figure(figsize=(12, 5))
     plt.bar(col, feature_imporance)
     plt.plot(feature_imporance, 'ro-')
-    plt.xticks(rotation = 30)
+    plt.xticks(rotation=30)
     plt.ylim([min(feature_imporance[:-1]), max(feature_imporance[:-1]) + 0.05])
-    plt.xlabel("feature name", fontdict = {"fontsize": 12})
-    plt.ylabel("importance coff", fontdict = {"fontsize": 12})
-    plt.title("Feature importance bar chart",fontdict = {"fontsize": 14})
+    plt.xlabel("feature name", fontdict={"fontsize": 12})
+    plt.ylabel("importance coff", fontdict={"fontsize": 12})
+    plt.title("Feature importance bar chart", fontdict={"fontsize": 14})
     plt.grid()
     plt.savefig(pic_path + '\{}_{}路公交决策树特征重要性.png'.format(func, line), dpi=400,
                 bbox_inches='tight')
     plt.show()
+
 
 def plot_tree(col, model, func, line, pic_path):
     feature_names = col.tolist()
     feature_names.append('bias')
     # 用来输出可视化图
     os.environ['PATH'] = os.pathsep + r'D:\ProgramData\Anaconda\Library\bin'
-    dot_data = export_graphviz(model, out_file = None
-                               , feature_names = col  # 特征名称
-                               , filled=True # 填充颜色
+    dot_data = export_graphviz(model, out_file=None
+                               , feature_names=col  # 特征名称
+                               , filled=True  # 填充颜色
                                , rounded=True  # 边框变为圆弧
-                               , special_characters=True # 显示特殊字符
-                                , proportion=True  # 呈现百分数
-                              )
+                               , special_characters=True  # 显示特殊字符
+                               , proportion=True  # 呈现百分数
+                               )
     # 输出PDF格式
     graph = pydotplus.graph_from_dot_data(dot_data)
     graph.write_pdf(pic_path + '\{}_{}路公交决策树.pdf'.format(func, line))
@@ -118,6 +130,7 @@ def plot_tree(col, model, func, line, pic_path):
     # 输出为PNG格式
     with open(pic_path + '\{}_{}路公交决策树.png'.format(func, line), "wb") as file:
         file.write(graph.create_png())
+
 
 '''
 parameters = {'splitter': ('best', 'random'),
@@ -139,32 +152,30 @@ if __name__ == '__main__':
     criterions = ['friedman_mse', 'mse', 'mae']
     pic_path = 'E:\公交客流预测\model_train_pic\决策树_日客流量'
     model_path = 'E:\公交客流预测\model\决策树_日客流量'
-    # day_pic_path = 'E:\公交客流预测\model_train_pic\决策树_各时段客流量'
-    # day_model_path = 'E:\公交客流预测\model\决策树_各时段客流量'
+    day_pic_path = 'E:\公交客流预测\model_train_pic\决策树_各时段客流量'
+    day_model_path = 'E:\公交客流预测\model\决策树_各时段客流量'
 
     # 线路6
     # line_6_path = 'E:\公交客流预测\data\\6路公交日客流量.csv'
     # line_6_data = data(line_6_path)
-    line_11_path = 'E:\公交客流预测\data\\11路公交日客流量.csv'
-    line_11_data = data(line_11_path)
+    # line_11_path = 'E:\公交客流预测\data\\11路公交日客流量.csv'
+    # line_11_data = data(line_11_path)
 
     # day_line_6_path = 'E:\公交客流预测\data\\6路公交各时段客流量.csv'
     # day_line_6_data = data(day_line_6_path)
-    # day_line_11_path = 'E:\公交客流预测\data\\11路公交各时段客流量.csv'
-    # day_line_11_data = data(day_line_11_path)
+    day_line_11_path = 'E:\公交客流预测\data\\11路公交各时段客流量.csv'
+    day_line_11_data = data(day_line_11_path)
 
     # 交叉验证
-    print('日客流量')
+    # print('日客流量')
     # cross_score(line_6_data[0], line_6_data[2])
-    cross_score(line_11_data[0], line_11_data[2])
-    # print('各时段客流量')
+    # cross_score(line_11_data[0], line_11_data[2])
+    print('各时段客流量')
     # cross_score(day_line_6_data[0], day_line_6_data[2])
-    # cross_score(day_line_11_data[0], day_line_11_data[2])
+    cross_score(day_line_11_data[0], day_line_11_data[2])
     # 决策树
     for func in criterions:
         # fit_DT_tree(line_6_data[0], line_6_data[2], line_6_data[1], line_6_data[3], line_6_data[4], func, '6', pic_path, model_path)
-        fit_DT_tree(line_11_data[0], line_11_data[2], line_11_data[1], line_11_data[3], line_11_data[4], func, '11',pic_path, model_path)
+        # fit_DT_tree(line_11_data[0], line_11_data[2], line_11_data[1], line_11_data[3], line_11_data[4], func, '11',pic_path, model_path)
         # fit_DT_tree(day_line_6_data[0], day_line_6_data[2], day_line_6_data[1], day_line_6_data[3], day_line_6_data[4], func, '6', day_pic_path, day_model_path)
-        # fit_DT_tree(day_line_11_data[0], day_line_11_data[2], day_line_11_data[1], day_line_11_data[3], day_line_11_data[4], func, '11',day_pic_path, day_model_path)
-
-
+        fit_DT_tree(day_line_11_data[0], day_line_11_data[2], day_line_11_data[1], day_line_11_data[3], day_line_11_data[4], func, '11',day_pic_path, day_model_path)

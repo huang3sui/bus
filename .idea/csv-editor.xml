@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\data\11路公交各时段客流量1.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\11路公交日客流量.csv">
           <value>
             <Attribute>
@@ -24,7 +31,21 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\data\6路公交各时段客流量1.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\6路公交日客流量.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\6路公交日客流量1.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -39,6 +60,27 @@
           </value>
         </entry>
         <entry key="\data\天气情况.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\process\6_mean.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\process\hour_6.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\process\w.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
