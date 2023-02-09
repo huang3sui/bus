@@ -10,10 +10,10 @@
 import pandas as pd
 import re
 
-
 weather_report = pd.read_csv('E:\公交客流预测\data\gd_weather_report.txt', header = None,
                        names = ['date', 'weather', 'temperature', 'wind_direction_force'])
 weather_report['date'] = pd.to_datetime(weather_report['date'], format='%Y-%m-%d')
+
 
 def splitInfo(x):
     info = x.split('/')
@@ -26,19 +26,22 @@ weather_report['weather_n'] = weather_report['weather'].apply(lambda x: splitInf
 
 pd.concat([weather_report['weather_n'], weather_report['weather_d']]).drop_duplicates()
 weather_map = {'晴' : 0,
-               '多云' : 1, '阴' : 1, '霾' : 1,
-               '阵雨' : 2, '雷阵雨' : 2,
-               '小雨' : 3,
-               '小到中雨' : 4,
-               '中雨' : 5,
-               '中到大雨' : 6,
-               '大雨' : 7,
-               '大到暴雨' : 8,
+               '多云' : 1, '阴' : 2,
+               '霾' : 3,
+               '阵雨' : 4,
+               '雷阵雨' : 5,
+               '小雨' : 6,
+               '小到中雨' : 7,
+               '中雨' : 8,
+               '中到大雨' : 9,
+               '大雨' : 10,
+               '大到暴雨' : 11,
                }
+
+# 降水情况
 weather_report['weather_d'] = weather_report['weather_d'].map(weather_map)
 weather_report['weather_n'] = weather_report['weather_n'].map(weather_map)
-weather_report['weather_avg'] = (weather_report['weather_d'] + weather_report['weather_n']) / 2
-
+# weather_report['weather_avg'] = (weather_report['weather_d'] + weather_report['weather_n']) / 2
 
 # 气温
 weather_report['temperature_h'] = weather_report['temperature'].apply(lambda x: int(re.sub(r'\D', '',splitInfo(x)[0])))
@@ -46,7 +49,7 @@ weather_report['temperature_l'] = weather_report['temperature'].apply(lambda x: 
 # 日平均温度
 weather_report['temperature_avg'] = (weather_report['temperature_h'] + weather_report['temperature_l']) / 2
 # 日温差
-weather_report['temperature_abs'] = abs(weather_report['temperature_h'] - weather_report['temperature_l'])
+# weather_report['temperature_abs'] = abs(weather_report['temperature_h'] - weather_report['temperature_l'])
 
 # 风向风力
 weather_report['wind_direction_force_d'] = weather_report['wind_direction_force'].apply(lambda x: splitInfo(x)[0])
@@ -59,7 +62,7 @@ wind_map = {'无持续风向≤3级' : 0,
             }
 weather_report['wind_d'] = weather_report['wind_direction_force_d'].map(wind_map)
 weather_report['wind_n'] = weather_report['wind_direction_force_n'].map(wind_map)
-weather_report['wind_avg'] = (weather_report['wind_d'] + weather_report['wind_n']) / 2
+# weather_report['wind_avg'] = (weather_report['wind_d'] + weather_report['wind_n']) / 2
 
 weather_report = weather_report.drop(['weather', 'temperature', 'wind_direction_force',
                                       'wind_direction_force_d', 'wind_direction_force_n'], axis = 1)

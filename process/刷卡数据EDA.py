@@ -14,18 +14,25 @@ from matplotlib import pyplot as plt
 from matplotlib.patches import ConnectionPatch
 import numpy as np
 
+plt.rcParams['font.sans-serif'] = ['simsun']  # 指定默认字体
+plt.rcParams['font.size'] = 10.5
+plt.rcParams['axes.unicode_minus'] = False  # 解决保存图像是负号'-'显示为方块的问题
+plt.rcParams['savefig.dpi'] = 400
+
+
+
 # 数据读取
 def data(path):
     line_x_df = pd.read_csv(path, encoding = 'gbk')
-    #date_population['客流量'] = line_6_df.groupby('date')['card_id'].count()
-    day_population = line_x_df.groupby(['date'])['card_id'].count()
+    #date_flow['客流量'] = line_6_df.groupby('date')['card_id'].count()
+    day_flow = line_x_df.groupby(['date'])['card_id'].count()
     day_data = []
-    for i in day_population.items():
+    for i in day_flow.items():
         day_data.append(i)
 
-    hour_day_population = line_x_df.groupby('deal_time')['card_id'].count()
+    hour_day_flow = line_x_df.groupby('deal_time')['card_id'].count()
     hour_day_data = []
-    for i in hour_day_population.items():
+    for i in hour_day_flow.items():
         hour_day_data.append(i)
     print(day_data)
 
@@ -37,10 +44,10 @@ def data(path):
     sizes = x_type_count.tolist()
     print(sizes)
 
-    return day_data, day_population, hour_day_population, labels, sizes
+    return day_data, day_flow, hour_day_flow, labels, sizes
 
 # 日历图
-def draw_day_date(day_data, day_population, line):
+def draw_day_date(day_data, day_flow, line):
     (
         Calendar()
         .add(
@@ -55,8 +62,8 @@ def draw_day_date(day_data, day_population, line):
         .set_global_opts(
             title_opts=opts.TitleOpts(title="公交客流日历图"),
             visualmap_opts=opts.VisualMapOpts(
-                max_=day_population.max(),
-                min_=day_population.min(),
+                max_=day_flow.max(),
+                min_=day_flow.min(),
                 orient="horizontal",
                 is_piecewise=True,
                 pos_top="230px",
@@ -77,13 +84,13 @@ def draw_day_date(day_data, day_population, line):
     )
 
 # 日客流量折线图
-def draw_day_population(day_population, line):
+def draw_day_flow(day_flow, line):
     (
         Line(init_opts=opts.InitOpts(width="1200px", height="600px"))
-        .add_xaxis(xaxis_data=day_population.index.tolist())
+        .add_xaxis(xaxis_data=day_flow.index.tolist())
         .add_yaxis(
             series_name="客流量",
-            y_axis=day_population.tolist(),
+            y_axis=day_flow.tolist(),
             is_smooth=False
         )
         .set_global_opts(
@@ -115,13 +122,13 @@ def draw_day_population(day_population, line):
     )
 
 # 各时段客流量折线图
-def draw_hour_day_population(hour_day_population, line):
+def draw_hour_day_flow(hour_day_flow, line):
     (
         Line(init_opts=opts.InitOpts(width="1200px", height="600px"))
-        .add_xaxis(xaxis_data=hour_day_population.index.tolist())
+        .add_xaxis(xaxis_data=hour_day_flow.index.tolist())
         .add_yaxis(
             series_name="客流量",
-            y_axis=hour_day_population.tolist(),
+            y_axis=hour_day_flow.tolist(),
             is_smooth=False
         )
         .set_global_opts(
@@ -181,8 +188,6 @@ def split_ls(sizes, labels, ls_all):
 
 def draw_complex_pie(label1, label2, size1, size2, line):
     #制画布
-    plt.rcParams['font.sans-serif'] = ['FangSong'] # 指定默认字体
-    plt.rcParams['axes.unicode_minus'] = False # 解决保存图像是负号'-'显示为方块的问题
     fig = plt.figure(figsize=(9,5.0625))
     ax1 = fig.add_subplot(121)
     ax2 = fig.add_subplot(122)
@@ -238,10 +243,10 @@ if __name__ == "__main__":
     line_11_data = data(line_11_path)
     draw_day_date(line_6_data[0], line_6_data[1], 6)    # 6路公交客流日历图
     draw_day_date(line_11_data[0], line_11_data[1], 11)  # 11路公交客流日历图
-    draw_day_population(line_6_data[1], 6)   # 6路公交日客流折线图
-    draw_day_population(line_11_data[1], 11)  # 11路公交日客流折线图
-    draw_hour_day_population(line_6_data[2], 6)  # 6路公交各时段客流折线图
-    draw_hour_day_population(line_11_data[2], 11)  # 11路公交各时段客流折线图
+    draw_day_flow(line_6_data[1], 6)   # 6路公交日客流折线图
+    draw_day_flow(line_11_data[1], 11)  # 11路公交日客流折线图
+    draw_hour_day_flow(line_6_data[2], 6)  # 6路公交各时段客流折线图
+    draw_hour_day_flow(line_11_data[2], 11)  # 11路公交各时段客流折线图
 
     # 6路公交各种卡类型复合饼图
     line_6_size_sum = ls_sum(line_6_data[-1])
